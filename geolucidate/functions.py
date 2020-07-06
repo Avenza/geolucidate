@@ -62,7 +62,7 @@ def _cleanup(parts):
 
 
 def _convert(latdir, latdeg, latmin, latsec,
-            longdir, longdeg, longmin, longsec):
+             longdir, longdeg, longmin, longsec):
     """
     Convert normalized degrees, minutes, and seconds to decimal degrees.
     Quantize the converted value based on the input precision and
@@ -76,8 +76,7 @@ def _convert(latdir, latdeg, latmin, latsec,
 
     """
 
-    with localcontext(ExtendedContext) as ctx:
-
+    with localcontext(ExtendedContext):
         if (latsec != '00' or longsec != '00'):
             precision = Decimal('0.000001')
         elif (latmin != '00' or longmin != '00'):

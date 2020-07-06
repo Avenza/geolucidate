@@ -79,11 +79,11 @@ def _convert(latdir, latdeg, latmin, latsec,
     with localcontext(ExtendedContext) as ctx:
 
         if (latsec != '00' or longsec != '00'):
-            ctx.prec = Decimal('0.000001')
+            precision = Decimal('0.000001')
         elif (latmin != '00' or longmin != '00'):
-            ctx.prec = Decimal('0.001')
+            precision = Decimal('0.001')
         else:
-            ctx.prec = Decimal('1')
+            precision = Decimal('1')
 
         latitude = Decimal(latdeg)
         latmin = Decimal(latmin)
@@ -112,8 +112,8 @@ def _convert(latdir, latdeg, latmin, latsec,
         if longdir == 'W':
             longitude *= Decimal('-1')
 
-        lat_str = str(latitude.quantize(ctx.prec))
-        long_str = str(longitude.quantize(ctx.prec))
+        lat_str = str(latitude.quantize(precision))
+        long_str = str(longitude.quantize(precision))
 
         return (lat_str, long_str)
 

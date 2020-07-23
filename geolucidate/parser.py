@@ -13,7 +13,15 @@ resulted in a rather lengthy and complex regular expression.
 
 import re
 
-parser_re = re.compile(r"""\b
+decimal_degree_re = re.compile(r"""
+  \(?
+  (?P<latitude>-?([0-8][0-9]|90)(\.\d+)?)
+  ,\s?
+  (?P<longitude>-?((1(([0-7][0-9]|80))|(0?[0-9][0-9])))(\.\d+)?)
+  \)?
+  """, re.VERBOSE | re.UNICODE | re.IGNORECASE)
+
+degree_min_sec_re = re.compile(r"""\b
     # Latitude direction, first position: one of N, S, NORTH, SOUTH
     ((?P<latdir>NORTH|SOUTH|[NS])\ ?)?
     # Latitude degrees: two digits 0-90
@@ -63,3 +71,8 @@ parser_re = re.compile(r"""\b
     """, re.VERBOSE | re.UNICODE | re.IGNORECASE)
 """The coordinate-parsing regular expression,
 compiled with :func:`re.compile`"""
+
+all_re = [
+    decimal_degree_re,
+    degree_min_sec_re,
+]

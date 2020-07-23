@@ -2,7 +2,7 @@
 import re
 from decimal import Decimal, localcontext, ExtendedContext
 
-from geolucidate.parser import parser_re
+from geolucidate.parser import degree_min_sec_re, decimal_degree_re
 from geolucidate.links.google import google_maps_link
 from geolucidate.links.tools import MapLink
 from geolucidate.constants import MINUTE_CHARACTERS_RE, SECOND_CHARACTERS_RE
@@ -22,7 +22,7 @@ def _normalize_string(string):
 
 def _cleanup(parts):
     """
-    Normalize up the parts matched by :obj:`parser.parser_re` to
+    Normalize up the parts matched by :obj:`parser.degree_min_sec_re` to
     degrees, minutes, and seconds.
 
     >>> _cleanup({'latdir': 'south', 'longdir': 'west',
@@ -61,17 +61,17 @@ def _cleanup(parts):
     return [latdir, latdeg, latmin, latsec, longdir, longdeg, longmin, longsec]
 
 
-def _convert(latdir, latdeg, latmin, latsec,
+def _convert_to_lat_lng(latdir, latdeg, latmin, latsec,
              longdir, longdeg, longmin, longsec):
     """
     Convert normalized degrees, minutes, and seconds to decimal degrees.
     Quantize the converted value based on the input precision and
     return a 2-tuple of strings.
 
-    >>> _convert('S','50','30','30','W','50','30','30')
+    >>> _convert_to_lat_lng('S','50','30','30','W','50','30','30')
     ('-50.508333', '-50.508333')
 
-    >>> _convert('N','50','27','55','W','127','27','65')
+    >>> _convert_to_lat_lng('N','50','27','55','W','127','27','65')
     ('50.459167', '-127.460833')
 
     """
@@ -117,6 +117,30 @@ def _convert(latdir, latdeg, latmin, latsec,
         return (lat_str, long_str)
 
 
+def retrieve_lat_long(string):
+    """ Takes a coordinate string and returns tuple of (lat, lng)
+    Checks against:
+    1. `decimal_degree_re`: if match, no conversion needed just return the (lat, lng)
+    2. `degree_min_sec_re`: convert to decimal/degree format first, then return (lat, lng)
+    :param string: coordinate string
+    :return: A lat/lng tuple extracted from the string
+    """
+
+    # Check if is decimal degree format. E.g. "43.897481, -80.051911"
+    match = decimal_degree_re.match(string)
+    if match is not None:
+        match_obj = match.groupdict()
+        return (
+            match_obj['latitude'],
+            match_obj['longitude'],
+        )
+
+    # It's a degree/minute/second format
+    string = _normalize_string(string)
+    match = degree_min_sec_re.match(string)
+    return _convert_to_lat_lng(*_cleanup(match.groupdict()))
+
+
 def replace(string, sub_function=google_maps_link()):
     """
     Replace detected coordinates with a map link, using the given substitution
@@ -140,11 +164,11 @@ def replace(string, sub_function=google_maps_link()):
 
     def do_replace(match):
         original_string = match.group()
-        (latitude, longitude) = _convert(*_cleanup(match.groupdict()))
+        (latitude, longitude) = _convert_to_lat_lng(*_cleanup(match.groupdict()))
         return sub_function(MapLink(original_string, latitude, longitude))
 
     string = _normalize_string(string)
-    return parser_re.sub(do_replace, string)
+    return degree_min_sec_re.sub(do_replace, string)
 
 
 def get_replacements(string, sub_function=google_maps_link()):
@@ -176,10 +200,10 @@ def get_replacements(string, sub_function=google_maps_link()):
 
     substitutions = {}
     string = _normalize_string(string)
-    matches = parser_re.finditer(string)
+    matches = degree_min_sec_re.finditer(string)
 
     for match in matches:
-        (latitude, longitude) = _convert(*_cleanup(match.groupdict()))
+        (latitude, longitude) = _convert_to_lat_lng(*_cleanup(match.groupdict()))
         substitutions[match] = sub_function(MapLink(match.group(),
                                                     latitude, longitude))
 

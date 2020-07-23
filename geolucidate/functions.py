@@ -117,6 +117,24 @@ def _convert_to_lat_lng(latdir, latdeg, latmin, latsec,
         return (lat_str, long_str)
 
 
+def _convert_signs(parts):
+    """ Convert South and West signs to a `-`
+    """
+    latdir = (parts['latdir'] or parts['latdir2'] or 'N').upper()[0]
+    longdir = (parts['longdir'] or parts['longdir2'] or 'S').upper()[0]
+
+    latitude = Decimal(parts['latitude'])
+    longitude = Decimal(parts['longitude'])
+
+    if latdir == 'S' or latdir == '-':
+        latitude *= Decimal('-1')
+
+    if longdir == 'W' or longdir == '-':
+        longitude *= Decimal('-1')
+
+    return str(latitude), str(longitude)
+
+
 def retrieve_lat_long(string):
     """ Takes a coordinate string and returns tuple of (lat, lng)
     Checks against:
@@ -126,15 +144,13 @@ def retrieve_lat_long(string):
     :return: A lat/lng tuple extracted from the string
     """
 
+    # No conversion needed
     # Check if is decimal degree format. E.g. "43.897481, -80.051911"
     match = decimal_degree_re.match(string)
     if match is not None:
-        match_obj = match.groupdict()
-        return (
-            match_obj['latitude'],
-            match_obj['longitude'],
-        )
+        return _convert_signs(match.groupdict())
 
+    # Needs conversion w/ `_convert_to_lat_lng()`
     # It's a degree/minute/second format
     string = _normalize_string(string)
     match = degree_min_sec_re.match(string)

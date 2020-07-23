@@ -14,11 +14,19 @@ resulted in a rather lengthy and complex regular expression.
 import re
 
 decimal_degree_re = re.compile(r"""
-  \(?
-  (?P<latitude>-?([0-8][0-9]|90)(\.\d+)?)
-  ,\s?
-  (?P<longitude>-?((1(([0-7][0-9]|80))|(0?[0-9][0-9])))(\.\d+)?)
-  \)?
+    ^
+    \(?
+    (?P<latdir>NORTH|SOUTH|[NS-])?\s?
+    (?P<latitude>([0-8][0-9]|90)(?P<latpoint>\.)?(?(latpoint)(\d+)|[^\d]))\s?
+    (degrees|°)?\s?
+    (?P<latdir2>NORTH|SOUTH|[NS])?
+    ([\s,]+)?
+    (?P<longdir>EAST|WEST|[EW-])?\s?
+    (?P<longitude>((1(([0-7][0-9]|80))|(0?[0-9][0-9])))(?P<longpoint>\.)?(?(longpoint)(\d+)|[^\d]))\s?
+    (degrees|°)?\s?
+    (?P<longdir2>EAST|WEST|[EW])?
+    \)?
+    $
   """, re.VERBOSE | re.UNICODE | re.IGNORECASE)
 
 degree_min_sec_re = re.compile(r"""\b

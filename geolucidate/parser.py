@@ -59,7 +59,7 @@ degree_min_sec_re = re.compile(r"""
     # Longitude direction, first position: one of E, W, EAST, WEST
     ((?(latdir)((?P<longdir>EAST|WEST|[EW])\ ?))|(?P<longsign>-)?)
     # Longitude degrees: two or three digits
-    (?P<longdeg>((1(([0-7][0-9]|80))|(0?[0-9][0-9]))))
+    (?P<longdeg>((1(([0-7][0-9]|80))|(0?[0-9]?[0-9]))))
     # If there was a degree mark before, look for another one here
     (\ |(?(degmark)(\ ?(º|°)\ ?|\.|-|\ DEGREES,\ )))?
     (?(latminsec)   #Only look for minutes and seconds in the longitude

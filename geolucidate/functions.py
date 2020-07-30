@@ -15,6 +15,7 @@ def _normalize_string(string):
     - forms of single quotes and prime characters to `'`
     - forms of double quotes and double prime characters to `"`
     """
+    string = string.strip()
     string = re.sub(MINUTE_CHARACTERS_RE, "'", string)
     string = re.sub(SECOND_CHARACTERS_RE, '"', string)
     return string
@@ -37,8 +38,21 @@ def _cleanup(parts):
 
     """
 
-    latdir = (parts['latdir'] or parts['latdir2']).upper()[0]
-    longdir = (parts['longdir'] or parts['longdir2']).upper()[0]
+    latsign = parts['latsign']
+    longsign = parts['longsign']
+
+    latdir = parts['latdir'] or parts['latdir2']
+    longdir = parts['longdir'] or parts['longdir2']
+
+    if latdir:
+        latdir = latdir.upper()[0]
+    elif latsign == '-':
+        latdir = 'S'
+
+    if longdir:
+        longdir = longdir.upper()[0]
+    elif longsign == '-':
+        longdir = 'W'
 
     latdeg = parts.get('latdeg')
     longdeg = parts.get('longdeg')
@@ -58,11 +72,28 @@ def _cleanup(parts):
         latsec = parts.get('latsec', '') or '00'
         longsec = parts.get('longsec', '') or '00'
 
-    return [latdir, latdeg, latmin, latsec, longdir, longdeg, longmin, longsec]
+    return [
+        latdir,
+        latdeg,
+        latmin,
+        latsec,
+        longdir,
+        longdeg,
+        longmin,
+        longsec,
+    ]
 
 
-def _convert_to_lat_lng(latdir, latdeg, latmin, latsec,
-             longdir, longdeg, longmin, longsec):
+def _convert_to_lat_lng(
+        latdir,
+        latdeg,
+        latmin,
+        latsec,
+        longdir,
+        longdeg,
+        longmin,
+        longsec,
+):
     """
     Convert normalized degrees, minutes, and seconds to decimal degrees.
     Quantize the converted value based on the input precision and
@@ -126,10 +157,10 @@ def _convert_signs(parts):
     latitude = Decimal(parts['latitude'])
     longitude = Decimal(parts['longitude'])
 
-    if latdir == 'S' or latdir == '-':
+    if latdir in ['S', '-']:
         latitude *= Decimal('-1')
 
-    if longdir == 'W' or longdir == '-':
+    if longdir in ['W', '-']:
         longitude *= Decimal('-1')
 
     return str(latitude), str(longitude)

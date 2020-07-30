@@ -91,6 +91,7 @@ DEGREE_MIN_SECS_TESTS = [
     ('3° 53.848\', -0° 3.115\'', '3.897,-0.052'),
     ('3° 53\' 50.9" N, 0° 03\' 06.9" W', '3.897472,-0.051917'),
     ('2°36.942\' N, 9°58.960\' W', '2.616,-9.983'),
+    ('6830N 70W', '68.500,-7.000'),
 ]
 
 
@@ -175,7 +176,7 @@ def check_parser(coord_string, expected):
 
 
 def test_false_positive():
-    values = ["GGN7383 was", "6830N 70W"]
+    values = ["GGN7383 was"]
     for test in values:
         yield check_false_positive, test
 

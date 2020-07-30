@@ -35,7 +35,7 @@ degree_min_sec_re = re.compile(r"""
     # Latitude direction, first position: one of N, S, NORTH, SOUTH
     (((?P<latdir>NORTH|SOUTH|[NS])\ ?)|(?P<latsign>-))?
     # Latitude degrees: two digits 0-90
-    (?P<latdeg>([0-8][0-9])|90)
+    (?P<latdeg>([0-8]?[0-9])|90)
     # Optional space, degree mark, period,
     # or word separating degrees and minutes
     (\ |(?P<degmark>\ ?(º|°)\ ?|(?P<degpd>\.)|-|\ DEGREES,\ ))?
